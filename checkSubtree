@@ -1,0 +1,99 @@
+/*
+checkSubtree: T1 and T2 are twp very large binary trees, with T1 much bigger than T2. Create an algorithm to determine
+if T2 is a subtree of T1.
+A tree T2 is a subtree of T1 if there exists a node n in T1 such that the subtree of n is identical to T2.
+That is, if you cut off the tree at node n, the two trees would be identical.
+*/
+/*
+the simple approach, we could consider comparing string representation of traversals of each tree.
+If T2 is a subtree of T1, then T2's traversal should be a substring of T1. Is the reverse true? 
+If so, should we use in-order traversal or pre-order?
+A binary search tree's in-order traversal always prints out the values in sorted order. Therefore, two bianry search trees with the same values will always 
+have the same in-order traversal, even if their structure is different.
+How about pre-order?(the first node is root node, the left and right element will follow) but still have problem.
+e.g:
+     3
+   /
+4
+
+3
+ \
+  4
+We can store NULL nodes in the pre-order traversal string as a special character, like an 'X'(we'll assume that the binary trees contain only integers)
+The left treew would have the traversal{3, 4, X} and the right tree will have the traversal {3, X, 4}
+Then the pre-oder traversal is unique. That is. if two trees have the same pre-order traversal, then we know they are
+identical trees in values and structure.
+If T2's pre-order traversal is a substring of T1's pre-order traversal, then T2's root element must be found in T1.
+*/
+boolean containsTree(TreeNode t1, TreeNode t2) {
+	StringBuilder string1 = new StringBuilder();
+	StringBuilder string2 = new StringBuilder();
+
+	getOrderString(t1, string1);
+	getOrderString(t2, string2);
+
+	return string1.indexOf(string2.toString()) != -1;
+}
+void getOrderString(TreeNode node, StringBuilder sb) {
+	if(node == null) {
+		sb.append("x");
+		return;
+	}
+	sb.append(node.data + " "); // add root
+	getOrderString(node.left, sb) // add left
+	getOrderString(node.right, sb) // add right
+
+}
+/*
+The alternative approach:
+is to search through the larger tree T1, each time a node in T1 matches the root in T2, call matchTree.
+The matchTree method will compare two subtrees to see if they are identical.
+*/
+boolean containsTree(TreeNode t1, TreeNode t2) {
+	if(t2 == null) return true;
+	return subtree(t1, t2);
+}
+boolean subTree(TreeNode r1, TreeNode r2) {
+	if(r1 == null) {
+		return false;
+	} else if (r1.data == r2.data && matchTree(r1, r2)) {
+		return true;
+	}
+	return subtree(r1.left, r2) || subtree(r1.right, r2);
+}
+boolean matchTree(TreeNode r1, TreeNode r2) {
+	if(r1 == null && r2 == null) {
+		return true;
+	} else if(r1 == null || r2 == null) {
+		return false;
+	} else if (r1.data != r2.data) {
+		return false;
+	} else{
+		return matchTree(r1.left, r2.left) && matchTree(r1.right, r2.right);
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

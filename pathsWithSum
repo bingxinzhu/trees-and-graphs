@@ -1,0 +1,112 @@
+/*
+You are giving a binary tree in which each node contains an integer value(which might be positive or negative)
+Design an algorithm to count the number of paths that sum to a given value. The path does not need to start or end
+at the root or a leaf, but it must go downwards(traveling only from parent nodes to child nodes).
+*/
+/*
+brute force solution:
+just look all possible paths. We traverse each node, tracking the sum as we go.
+*/
+int countPathWithSum(TreeNode root, int targetSum) {
+	if(root == null) return 0;
+
+	// count paths with sum starting from the root
+	int PathsFromRoot = countPathWithSumFromNode(root, targetSum, 0);
+
+	// try the nodes on the left and right
+	int pathsOnLeft = countPathWithSum(root.left, targetSum);
+	int pathsOnRight = countPathWithSum(root.right, targetSum);
+
+	return PathsFromRoot + pathsOnRight + pathsOnLeft;
+}
+// return tbe number of paths with this sum starting from this node
+int countPathWithSumFromNode(TreeNode node, int targetSum, int currentSum) {
+	if(node == null) return 0;
+
+	currentSum += node.data;
+
+	int totalPaths = 0;
+	if(currentSum == targetSum) { // found a path from the root
+		totalPaths ++;
+	}
+	totalPaths += countPathWithSumFromNode(node.left, targetSum, currentSum);
+	totalPaths += countPathWithSumFromNode(node.right, targetSum, currentSum);
+	return totalPaths;
+}
+/*
+optimized solution: 
+consider an array first:
+10 -> 5 -> 1 -> 2 -> -1 -> -1 -> 7 -> 1 -> 2
+
+------ --------------
+s     x<-targetsum->y
+if each value knows its running sum(the sum of values from s through itself) then we can find this pretty
+easily. We just need to leverage this simple equation: runningSum(x) = runningSum(y) - targetSum
+we then look for the values of x where this is true.
+since we are just looking for the number of paths, we can use a hash table. As we iterate through the array,
+build a hash table that maps from a runningSum to the number of times we've seen that sum. then, for each y. 
+look up runningSum(y) - targetSum in the hash table. The value in the hash will tell you the number of paths with 
+sum targetSum that end at y.
+For example,
+index	0	1	2	3	4	5	6	7	8
+value  10 ->5 ->1 ->2->-1->-1 ->7 ->1 ->2
+sum    10  15  16  18  17  16  23  24  26
+
+The value of runningSum, is 24. If targetSum is 8, then we'd look up 16 in the hash table. 
+This would have a value of 2(originating from index 2 and index 5). 
+The algorithm is :
+we traverse through the tree using depth-first search, as we visit each node:
+1. Track its runningSum. We'll take this in as a parameter and immediately increment it by node.value
+2. Look up runningSum - targetSum in th hash table. The value there indicates the total number. Set totalPaths to this value
+3: If runningSum == targetSum, then there's one additional path that starts at the root, increment total path.
+4: Add runningSum to the hash table(incrementing the value if is's already there)
+5: Recurse left and right, counting the number of paths with sum targetSum.
+6: After we're done recursing left and right, decrement the value of the runningSum in the hash table, this is 
+essentitally backing out of our work; it reverse the changes to the hash table so that other nodes don't use it(since we're now done with node)
+*/
+int countPathWithSum(TreeNode root, int targetSum) {
+	return countPathWithSum(root, targetSum, 0, new HashMap<Integer, Integer>());
+}
+
+int countPathWithSum(TreeNode node, int targetSum, int runningSum, HashMap<Integer,Integer> pathCount) {
+	if (node == null)  return 0;
+
+	runningSum += node.data;
+	int sum = runningSum - targetSum;
+	int totalPaths = pathCount.getOrDefault(sum, 0);
+
+	if(runningSum == targetSum) {
+		totalPaths ++;
+	}
+	incrementHashTable(pathCount, runningSum, 1);
+	totalPaths += countPathWithSum(node.left, targetSum, runningSum, pathCount);
+	totalPaths += countPathWithSum(node.right, targetSum, runningSum, pathCount);
+	incrementHashTable(pathCount,runningSum, -1);
+}
+void incrementHashTable(HashMap<Integer,Integer> hashTable, int key, int delta) {
+	int newCount = hashTable.getOrDefault(key, 0) + delta;
+	if (newCount == 0) {
+		hashTable.remove(key);
+	} else {
+		hashTable.put(key, newCount);
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

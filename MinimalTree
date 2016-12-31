@@ -1,0 +1,30 @@
+/*
+Given a sorted(increasing order) array with unique integer elements. write an algorithm to create a binary search tree with minimal height.
+*/
+/*
+To create a tree of  minimal height, we need to match the number of nodes in the left subtree
+to the number of right subtree as much as possible. This means that we want the root to be the middle
+of the array, since this would mean that half the elements would be lass than the root  and half would be greater than it.
+We proceed with constructing our tree in a similar fashion. The middle of each subsection of the array becomes
+the root of the nod. The left half of the array will become our left subtree, and the right half of the array become the right subtree.
+One way to implement this is to use a simple root.insertNode(int v) method which inserts the value v through a recursive
+process that starts with the root node. This cost O(NlogN) to the tree.
+ALternatively, we could do:
+1. insert into the tree the middle element of the array.
+2. insert(into the left subtree) the left subarray elements.
+3. insert(into the right subtree) the right subarray elements.
+4. Recurse.
+*/
+TreeNode createMinimalBST(int array[]) {
+	return createMinimalBST(array, 0, array.length -1);
+}
+TreeNode createMinimalBST(int arr[], int start, int end) {
+	if(end < start){
+		return null;
+	}
+	int mid = (start + end) / 2;
+	TreeNode n = new TreeNode(arr[mid]);
+	n.left = createMinimalBST(arr, start, mid - 1);
+	n.right = createMinimalBST(arr, mid + 1, end);
+	return n;
+}

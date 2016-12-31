@@ -1,0 +1,80 @@
+/*
+implement a function to check if a binary tree is a binary search tree.
+We can implement this solution in two different ways. The first leverages the in-order traversak,
+and the second builds off the property that left <= current < right.
+solution 1: in order traversal
+In-order traversal, copy the elements to an array, and then check to see if the array is
+sorted. This solution takes up a bit of extra memeory, but it works - mostly.
+The only problem is that it can't handle duplicate values in the tree properly. 
+For example, the algorithm cannot distinguish the two trees below since they have the same 
+in-order traversal.
+
+Valid BST:
+    20
+   /
+20
+
+Invalid BST:
+20
+  \ 
+   20
+if we assume that this approach works. The pseudocode for this method looks something like:
+*/
+int index = 0;
+void copyBST(TreeNode root, int[] array) {
+	if(root == null) return;
+	copyBST(root.left, array);
+	array[index] = root.data;
+	index++;
+	copyBST(root.right, array);
+}
+
+boolean checkBST(TreeNode root) {
+	int[] array = new int[root.size];
+	copyBST(root.array);
+	for(int i = 1; i < array.length; i++) {
+		if(array[i] <= array[i - 1]) return false;
+	}
+	return true;
+}
+// notice that array is not necessay, we never use it other than to compare an element to the previous element.
+Integer last_print = null;
+boolean checkBST(TreeNode n) {
+	if(n == null) return true;
+
+	if(!checkBST(n.left)) return false;
+	if(last_print != null && n.data <= last_print) {
+		return false;
+	}
+	last_print = n.data;
+
+	if(!checkBST(n.right)) return false;
+	return true;
+}
+/*
+solution 2: The Min/Max slution -> when it must satisify the definition of the binary search tree.
+The condition is that all left children nodes must be less than or equal to the current node. which must be less than right node.
+we start with a range of (min = NULL, max = NULL), which the root obviously meets. 
+When we branch left, the max get updated; when we branch right, the min get undated. If anything fails these check, we stop and return false.
+*/
+boolean checkBST(TreeNode n) {
+	return checkBST(n, null, null);
+}
+boolean checkBST(TreeNode n, Integer min, Integer max) {
+	if(n == null) {
+		return true;
+	}
+	if((min != null && n.data <= min) || (max != null && n.data > max)) {
+		return false;
+	}
+	if(!checkBST(n.left, min, n.data) || !checkBST(n.right, n.data, max)) {
+		return false;
+	}
+	return true;
+}
+
+
+
+
+
+

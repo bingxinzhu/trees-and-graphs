@@ -1,0 +1,60 @@
+/*
+implement a function to check if a binary tree is balanced.
+A balanced tree is a tree that the heights of the two subtrees of any node never differ by more than one.
+*/
+/*
+we can simply recurse through the entire and for each node, compute the heights for each subtree.
+*/
+int getHeight(TreeNode root) {
+	if(root == null) return -1;
+	return Math.max(getHeight(root.left), getHeight(root.right)) + 1;
+}
+boolean isBalanced(TreeNode root) {
+	if (root == null) return null; // base case
+	int heightDiff = getHeight(root.left) - getHeight(root.right);
+	if(Math.abs(heightDiff) > 1) {
+		return false;
+	} else {   // recurse
+		return isBalanced(root.left) && isBalanced(root.right);
+	}
+}
+/*
+this is not efficient, this means that getHeight is called repeatedly on the same nodes.
+The algortithm is O(NlogN) since each node is "touched" once per node.
+We notice that getHeight could actually check if the tree is balanced at the same time as its'
+checking heights.
+Check the height of each subtree as we recurse down from the root. On each node, we recursively get the heights of the left and right subtree
+through the checkHeight method. If the subtree is balanced, then checkHeight will return the 
+actual height of the subtree, if the subtree is not balanced, then checkHeight will return an error code.
+We will immediately return an error code from the current call.
+What do we use for an error code?
+The height of a null tree is generally defined to be -1. so that's not a good idea for an error code.
+We'll use Integer.MIN_VALUE.
+*/
+int checkHeight(TreeNode root) {
+	if(root == null) {
+		return -1;
+	}
+	int leftHeight = checkHeight(root.left);
+	if(leftHeight == Integer.MIN_VALUE) return Integer.MIN_VALUE; // pass error up
+
+	int rightHeight = checkHeight(root.right);
+	if(rightHeight == Integer.MIN_VALUE) return Integer.MIN_VALUE;// pass error up
+	int heightDiff = leftHeight - rightHeight;
+	if(Math.abs(heightDiff) > 1) {
+		return Integer.MIN_VALUE;
+	} else {
+		return Math.max(leftHeight, rightHeight) + 1;
+	}
+}
+boolena isBalanced(TreeNode root) {
+	return checkHeight(root) != Integer.MIN_VALUE;
+}
+
+// O(N) time and O(H) space, where H is the height of the tree.
+
+
+
+
+
+
